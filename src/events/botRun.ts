@@ -1,9 +1,9 @@
-const { Events } = require('discord.js');
+import {Client, Events} from "discord.js";
 
 module.exports = {
     name: Events.ClientReady,
     once: true,
-    execute(client) {
-        console.log(`Aurum is ready!✅`);
+    execute(client: Client) {
+        console.log(`${client.user?.username} is ready!✅`);
     },
 };

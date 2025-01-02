@@ -1,18 +1,18 @@
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const { testBotId } = require('../data/config.json');
+import * as fs from "node:fs";
+import * as path from "node:path";
+import {REST} from '@discordjs/rest';
+import {Routes} from 'discord-api-types/v9';
+import {testBotId} from '../data/config.json';
 
-const token = process.env.BOT_TEST_TOKEN;
+const token:string = process.env.BOT_TEST_TOKEN as string;
 
 const commands = [];
-const foldersPath = path.join(__dirname, './Commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const deployFoldersPath = path.join(__dirname, './Commands');
+const deployCommandFolders = fs.readdirSync(deployFoldersPath);
 
-for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder);
+for (const folder of deployCommandFolders) {
+    const commandsPath = path.join(deployFoldersPath, folder);
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
     for (const file of commandFiles) {
@@ -37,7 +37,7 @@ const rest = new REST({ version: '9' }).setToken(token);
         );
 
         console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-        console.error(error);
+    } catch (Error) {
+        console.error(Error);
     }
 })();

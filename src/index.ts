@@ -1,6 +1,8 @@
+import {Interaction} from "discord.js";
+
 require('dotenv').config();
-const fs = require('node:fs');
-const path = require('node:path');
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 const {Client, Events, GatewayIntentBits, Collection, ActivityType, EmbedBuilder} = require('discord.js');
 
@@ -8,8 +10,8 @@ const client = new Client({intents: [GatewayIntentBits.GuildPresences, GatewayIn
 
 client.commands = new Collection();
 
-const foldersPath = path.join(__dirname, 'Commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const foldersPath: string = path.join(__dirname, 'Commands');
+const commandFolders: string[] = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
     const commandsPath = path.join(foldersPath, folder);
@@ -39,7 +41,7 @@ const embedError = new EmbedBuilder()
     .setTitle('Error')
     .setDescription(`Unknown error, check the console for more information.`)
 
-client.on(Events.InteractionCreate, async interaction => {
+client.on(Events.InteractionCreate, async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
         const command = interaction.client.commands.get(interaction.commandName);
 
@@ -68,9 +70,9 @@ for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
     const event = require(filePath);
     if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args));
+        client.once(event.name, (...args: any[]) => event.execute(...args));
     } else {
-        client.on(event.name, (...args) => event.execute(...args));
+        client.on(event.name, (...args: any[]) => event.execute(...args));
     }
 }
 

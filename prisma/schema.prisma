@@ -14,15 +14,15 @@ datasource db {
 }
 
 model User {
-  id       BigInt  @id
-  username String
+  id       BigInt @id
+  username String @unique
 
   guilds GuildMemberData[] @relation("UserToGuilds")
 }
 
 model Guild {
-  id      BigInt  @id
-  name    String
+  id   BigInt @id
+  name String
 
   members GuildMemberData[] @relation("GuildToMembers")
 }

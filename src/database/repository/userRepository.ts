@@ -12,12 +12,10 @@ module.exports = {
     return client.user.findUnique({where: { username: username }})
   },
   
-  async upsert(id: bigint, username: string, nickname: string, streak: number = 0) {
+  async upsert(id: bigint, username: string) {
     let data = {
       id: id,
-      username: username,
-      nickname: nickname,
-      streak: streak
+      username: username
     }
     return client.user.upsert({
       where: { id: id },
@@ -26,13 +24,11 @@ module.exports = {
     })
   },
   
-  async upsertFromUser(user: User, streak: number) {
+  async upsertFromUser(user: User) {
     let id = BigInt(user.id)
     let data = {
       id: id,
-      username: user.username,
-      nickname: user.displayName,
-      streak: streak
+      username: user.username
     }
     
     return client.user.upsert({

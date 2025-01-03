@@ -3,26 +3,48 @@ import { User } from "discord.js";
 
 const client = new PrismaClient()
 
-const userRepository = {
-  async getUser(id: string) {
-    return client.user.findFirst({
-        where: { id: BigInt(id) }
-    })
+module.exports = {
+  async getById(id: bigint) {
+    return client.user.findUnique({where: { id: id }})
   },
-
-  async upsertUser(user: User) {
-    const id = BigInt(user.id)
-    const data = {
+  
+  async getByUsername(username: string) {
+    return client.user.findUnique({where: { username: username }})
+  },
+  
+  async upsert(id: bigint, username: string, nickname: string, streak: number = 0) {
+    let data = {
       id: id,
-      username: user.username
+      username: username,
+      nickname: nickname,
+      streak: streak
     }
-
     return client.user.upsert({
       where: { id: id },
       create: data,
       update: data
     })
+  },
+  
+  async upsertFromUser(user: User, streak: number) {
+    let id = BigInt(user.id)
+    let data = {
+      id: id,
+      username: user.username,
+      nickname: user.displayName,
+      streak: streak
+    }
+    
+    return client.user.upsert({
+      where: { id: id },
+      create: data,
+      update: data
+    })
+  },
+  
+  async delete(id: bigint) {
+    return client.user.delete({
+      where: { id: id }
+    })
   }
 }
-
-export default userRepository;

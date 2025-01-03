@@ -28,7 +28,7 @@ model Guild {
 }
 
 model GuildMemberData {
-  id          BigInt   @id
+  id          BigInt  @id
   guildId     BigInt
   userId      BigInt
   nickname    String?

@@ -3,7 +3,7 @@ import { User } from "discord.js";
 
 const client = new PrismaClient()
 
-module.exports = {
+const userRepository = {
   async getById(id: bigint) {
     return client.user.findUnique({where: { id: id }})
   },
@@ -44,3 +44,5 @@ module.exports = {
     })
   }
 }
+
+export default userRepository

@@ -36,8 +36,8 @@ const memberGuildRepository = {
         if (!await guildRepository.getGuild(guild.id)) {
             await guildRepository.upsertGuild(guild);
         }
-        if (!await userRepository.getUser(user.id)) {
-            await userRepository.upsertUser(user);
+        if (!await userRepository.getById(BigInt(user.id))) {
+            await userRepository.upsertFromUser(user);
         }
 
         const existingMember = await client.guildMemberData.findFirst({

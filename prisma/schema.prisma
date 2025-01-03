@@ -16,6 +16,27 @@ datasource db {
 model User {
   id       BigInt  @id
   username String
-  nickname String?
-  streak   Int
+
+  guilds GuildMemberData[] @relation("UserToGuilds")
+}
+
+model Guild {
+  id      BigInt  @id
+  name    String
+
+  members GuildMemberData[] @relation("GuildToMembers")
+}
+
+model GuildMemberData {
+  id          BigInt   @id
+  guildId     BigInt
+  userId      BigInt
+  nickname    String?
+  streak      Int
+  lastMessage DateTime
+
+  guild Guild @relation(fields: [guildId], references: [id], name: "GuildToMembers")
+  user  User  @relation(fields: [userId], references: [id], name: "UserToGuilds")
+
+  @@unique([guildId, userId])
 }

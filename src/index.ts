@@ -10,7 +10,7 @@ const client = new Client({intents: [GatewayIntentBits.GuildPresences, GatewayIn
 
 client.commands = new Collection();
 
-const foldersPath: string = path.join(__dirname, 'Commands');
+const foldersPath: string = path.join(__dirname, 'commands');
 const commandFolders: string[] = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
@@ -76,4 +76,4 @@ for (const file of eventFiles) {
     }
 }
 
-client.login(process.env.BOT_TEST_TOKEN);
+client.login(process.env.BOT_TOKEN);

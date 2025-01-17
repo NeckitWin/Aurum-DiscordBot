@@ -5,6 +5,7 @@ module.exports = {
         .setName('ping')
         .setDescription('Replies with Pong!'),
     async execute(interaction:CommandInteraction) {
-        await interaction.reply('test');
+        const ping = Date.now() - interaction.createdTimestamp;
+        await interaction.reply(`Понг! ${ping}ms`);
     }
 }

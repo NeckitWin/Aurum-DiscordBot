@@ -2,6 +2,9 @@
 CREATE TABLE `User` (
     `id` BIGINT NOT NULL,
     `username` VARCHAR(191) NOT NULL,
+    `premium` BOOLEAN NOT NULL DEFAULT false,
+    `premiumEmoji` VARCHAR(191) NULL,
+    `isVisibleEmoji` BOOLEAN NOT NULL DEFAULT true,
 
     UNIQUE INDEX `User_username_key`(`username`),
     PRIMARY KEY (`id`)
@@ -11,6 +14,8 @@ CREATE TABLE `User` (
 CREATE TABLE `Guild` (
     `id` BIGINT NOT NULL,
     `name` VARCHAR(191) NOT NULL,
+    `emoji` VARCHAR(191) NOT NULL DEFAULT '🔥',
+    `isStreakVisibilityToggle` BOOLEAN NOT NULL DEFAULT true,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

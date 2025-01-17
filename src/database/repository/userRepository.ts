@@ -8,10 +8,6 @@ const userRepository = {
     return client.user.findUnique({where: { id: BigInt(id) }})
   },
   
-  async getByUsername(username: string) {
-    return client.user.findUnique({where: { username: username }})
-  },
-  
   async upsert(id: bigint, username: string) {
     let data = {
       id: id,
@@ -23,18 +19,17 @@ const userRepository = {
       update: data
     })
   },
-  
-  async upsertFromUser(user: User) {
-    let id = BigInt(user.id)
-    let data = {
-      id: id,
-      username: user.username
+
+  async updateVisibleEmoji(id: string, isVisibleEmoji: boolean) {
+    const userId = BigInt(id);
+    const data = {
+      id: userId,
+      isVisibleEmoji: isVisibleEmoji
     }
-    
-    return client.user.upsert({
-      where: { id: id },
-      create: data,
-      update: data
+
+    return client.user.update({
+      where: { id: userId },
+      data: data
     })
   },
   

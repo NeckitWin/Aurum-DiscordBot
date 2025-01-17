@@ -5,8 +5,9 @@ const client = new PrismaClient()
 
 const guildRepository = {
     async getGuild(id: string) {
+        const guildId = BigInt(id)
         return client.guild.findFirst({
-            where: {id: BigInt(id)}
+            where: {id: guildId}
         })
     },
 
@@ -21,6 +22,21 @@ const guildRepository = {
             where: {id: id},
             create: data,
             update: data
+        })
+    },
+
+    async updateEmoji(guild: Guild, emoji: string) {
+        const guildId = BigInt(guild.id);
+
+        const data = {
+            id: guildId,
+            name: guild.name,
+            emoji: emoji
+        }
+
+        return client.guild.update({
+            where: {id: guildId},
+            data: data
         })
     }
 }

@@ -3,9 +3,9 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {REST} from '@discordjs/rest';
 import {Routes} from 'discord-api-types/v9';
-import {testBotId} from '../data/config.json';
+import {botId} from '../data/config.json';
 
-const token:string = process.env.BOT_TEST_TOKEN as string;
+const token:string = process.env.BOT_TOKEN as string;
 
 const commands = [];
 const deployFoldersPath = path.join(__dirname, './Commands');
@@ -32,7 +32,7 @@ const rest = new REST({ version: '9' }).setToken(token);
         console.log('Started refreshing application (/) commands.');
 
         await rest.put(
-            Routes.applicationCommands(testBotId),
+            Routes.applicationCommands(botId),
             { body: commands },
         );
 

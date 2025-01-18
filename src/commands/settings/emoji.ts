@@ -1,5 +1,5 @@
 import {
-    ChatInputCommandInteraction,
+    ChatInputCommandInteraction, EmbedBuilder,
     Guild,
     PermissionsBitField,
     SlashCommandBuilder
@@ -21,24 +21,22 @@ module.exports = {
                 ru: 'Эмодзи для ника'
             })
             .setRequired(true)
-        )
-    ,
+        ),
     async execute(interaction: ChatInputCommandInteraction) {
-        const emoji: string | null = interaction.options.getString('emoji') || '🔥';
+        const emoji: string | null = interaction.options.getString('emoji');
         const guild = interaction.guild as Guild;
-        // проверяем является ли символ эмодзи
-        if (!guild) return await interaction.reply({
-            content: 'This command can only be used in a server',
-            ephemeral: true
-        });
-        if (emoji && !emoji.match(/[\u{1F000}-\u{1FFFF}]/u)) {
-            return await interaction.reply({
-                content: 'This is not an emoji',
-                ephemeral: true
-            });
+        const embed = new EmbedBuilder().setColor('#ae0000')
+        if (!guild) {
+            embed.setDescription('Эта команда доступна только на сервере');
+            return await interaction.reply({embeds: [embed], ephemeral: true});
+        }
+        if (!emoji) return await interaction.reply({content: 'Введите эмодзи', ephemeral: true});
+        if (!emoji.match(/[\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u)) {
+            embed.setDescription('Это не эмодзи');
+            return await interaction.reply({embeds: [embed], ephemeral: true});
         }
         await guildRepository.updateEmoji(guild, emoji);
-        await interaction.reply({ content: `Emoji updated to ${emoji}` });
-
+        embed.setDescription(`Эмодзи для ника установлено на ${emoji}`).setColor('#248045');
+        await interaction.reply({embeds: [embed]});
     }
 }

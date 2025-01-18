@@ -8,7 +8,7 @@ import {botId} from '../data/config.json';
 const token:string = process.env.BOT_TOKEN as string;
 
 const commands = [];
-const deployFoldersPath = path.join(__dirname, './Commands');
+const deployFoldersPath = path.join(__dirname, './commands');
 const deployCommandFolders = fs.readdirSync(deployFoldersPath);
 
 for (const folder of deployCommandFolders) {

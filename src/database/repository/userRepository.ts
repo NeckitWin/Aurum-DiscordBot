@@ -8,7 +8,9 @@ const userRepository = {
     return client.user.findUnique({where: { id: BigInt(id) }})
   },
   
-  async upsert(id: bigint, username: string) {
+  async upsert(user: User) {
+    const id = BigInt(user.id);
+    const username = user.username;
     let data = {
       id: id,
       username: username

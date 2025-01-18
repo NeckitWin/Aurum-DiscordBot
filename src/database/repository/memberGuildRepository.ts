@@ -32,7 +32,7 @@ const memberGuildRepository = {
         const getGuild = await guildRepository.getGuild(guild.id);
 
         if (!getUser) {
-            await userRepository.upsertFromUser(user);
+            await userRepository.upsert(user);
         }
         if (!getGuild) {
             await guildRepository.upsertGuild(guild);

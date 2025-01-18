@@ -15,6 +15,7 @@ module.exports = {
                 const userData = await userRepository.getById(interaction.user.id);
                 const isPremium = userData?.premium;
                 let isVisibleEmoji = userData?.isVisibleEmoji;
+                const premEmoji = userData?.premiumEmoji;
 
                 if ( customId === 'setVisibleEmoji') {
                     await userRepository.updateVisibleEmoji(interaction.user.id, !isVisibleEmoji);
@@ -34,13 +35,22 @@ module.exports = {
                 const buttonCustomEmoji = new ButtonBuilder()
                     .setLabel('Собственный эмодзи')
                     .setCustomId('setCustomEmoji')
-                    .setEmoji('🔧')
+                    .setEmoji('👑')
                     .setStyle(ButtonStyle.Primary);
 
-                const rowButtons = new ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(buttonVisibleEmoji);
+                const buttonPremium = new ButtonBuilder()
+                    .setLabel(`Премиум`)
+                    .setCustomId('setPremium')
+                    .setEmoji('👑')
+                    .setStyle(isPremium ? ButtonStyle.Success : ButtonStyle.Danger);
 
-                await interaction.update({embeds: [embed], components: [rowButtons]});
+                const rowButtons = new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(buttonVisibleEmoji, buttonPremium);
+
+                const rowPremFeatures = new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(buttonCustomEmoji);
+
+                await interaction.update({embeds: [embed], components: [rowButtons, rowPremFeatures]});
 
             } else if (customId === 'showGuildSettings') {
 

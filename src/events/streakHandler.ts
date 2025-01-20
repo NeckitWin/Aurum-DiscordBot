@@ -20,10 +20,10 @@ module.exports = {
             if (!guildData) return;
 
             const emoji = guildData.emoji || '';
-            const data = await memberGuildRepository.getMemberGuild(guild, author);
-            if (!data || guild.ownerId === author.id) return;
+            const memberData = await memberGuildRepository.getMemberGuild(guild, author);
+            if (!memberData || guild.ownerId === author.id || !memberData.isVisibleEmoji) return;
 
-            await updateMemberNickname(member, author.displayName, emoji, data.streak);
+            await updateMemberNickname(member, author.displayName, emoji, memberData.streak);
         } catch (err) {
             console.error(err);
         }

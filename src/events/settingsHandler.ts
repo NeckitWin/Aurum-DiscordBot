@@ -1,5 +1,7 @@
 import {ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder, Events} from "discord.js";
 import userRepository from "../database/repository/userRepository";
+import memberGuildRepository from "../database/repository/memberGuildRepository";
+import guildRepository from "../database/repository/guildRepository";
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -10,15 +12,16 @@ module.exports = {
             const {customId} = interaction;
             if (!customIds.includes(customId)) return;
             if (interaction.user.id !== interaction.message.interaction?.user.id) return interaction.reply({content: 'Команда вызвана не вами', ephemeral: true});
-
+            if (!interaction.guild) return;
             if (customId === 'showUserSettings' || customId === 'setVisibleEmoji') {
                 const userData = await userRepository.getById(interaction.user.id);
+                const memberData = await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user);
                 const isPremium = userData?.premium;
-                let isVisibleEmoji = userData?.isVisibleEmoji;
+                let isVisibleEmoji = memberData?.isVisibleEmoji;
                 const premEmoji = userData?.premiumEmoji;
 
                 if ( customId === 'setVisibleEmoji') {
-                    await userRepository.updateVisibleEmoji(interaction.user.id, !isVisibleEmoji);
+                    await memberGuildRepository.updateVisibleEmoji(interaction.user.id, interaction.guild.id, !isVisibleEmoji);
                     isVisibleEmoji = !isVisibleEmoji;
                 }
 
@@ -53,6 +56,21 @@ module.exports = {
                 await interaction.update({embeds: [embed], components: [rowButtons, rowPremFeatures]});
 
             } else if (customId === 'showGuildSettings') {
+                const embedGuildSettings = new EmbedBuilder()
+                    .setTitle('Настройки сервера')
+                    .setDescription('Управляйте ролями и другими настройками бота');
+
+                const buttonAddRoles = new ButtonBuilder()
+                    .setLabel('Настройка ролей')
+                    .setCustomId('addRoles')
+                    .setEmoji('👑')
+                    .setStyle(ButtonStyle.Primary);
+
+                const rowButtons = new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(buttonAddRoles);
+
+                await interaction.update({embeds: [embedGuildSettings], components: [rowButtons]});
+
 
             }
 

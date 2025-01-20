@@ -22,19 +22,6 @@ const userRepository = {
     })
   },
 
-  async updateVisibleEmoji(id: string, isVisibleEmoji: boolean) {
-    const userId = BigInt(id);
-    const data = {
-      id: userId,
-      isVisibleEmoji: isVisibleEmoji
-    }
-
-    return client.user.update({
-      where: { id: userId },
-      data: data
-    })
-  },
-  
   async delete(id: bigint) {
     return client.user.delete({
       where: { id: id }

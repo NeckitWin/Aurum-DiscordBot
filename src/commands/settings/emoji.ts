@@ -35,6 +35,7 @@ module.exports = {
             embed.setDescription('Это не эмодзи');
             return await interaction.reply({embeds: [embed], ephemeral: true});
         }
+        if (!await guildRepository.getGuild(guild.id)) await guildRepository.upsertGuild(guild);
         await guildRepository.updateEmoji(guild, emoji);
         embed.setDescription(`Эмодзи для ника установлено на ${emoji}`).setColor('#248045');
         await interaction.reply({embeds: [embed]});

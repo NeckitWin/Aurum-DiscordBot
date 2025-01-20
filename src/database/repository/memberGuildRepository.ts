@@ -39,7 +39,7 @@ const memberGuildRepository = {
         }
 
         let lastActivity;
-        const day = 1000;
+        const day = 86400000;
         const getData = await memberGuildRepository.getMemberGuild(guild, user);
         if (getData) {
             lastActivity = getData.lastMessage;
@@ -71,7 +71,21 @@ const memberGuildRepository = {
                 lastMessage: updateMessageDate
             }
         });
-    }
+    },
+
+
+    async updateVisibleEmoji(userID: string, guildID:string , isVisibleEmoji: boolean) {
+        const userId = BigInt(id);
+        const guildId = BigInt(guildID);
+
+        return client.user.update({
+            where: { guildId_userId: { guildId: guildId, userId: userId } },
+            data: {
+                isVisibleEmoji: isVisibleEmoji
+            }
+        })
+    },
+
 };
 
 export default memberGuildRepository;

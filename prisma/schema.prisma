@@ -12,7 +12,6 @@ model User {
   username String @unique
   premium  Boolean @default(false)
   premiumEmoji String?
-  isVisibleEmoji Boolean @default(true)
 
   guilds GuildMemberData[] @relation("UserToGuilds")
 }
@@ -24,6 +23,7 @@ model Guild {
   isStreakVisibilityToggle Boolean @default(true)
 
   members GuildMemberData[] @relation("GuildToMembers")
+  lvlRoles lvlRoles[]
 }
 
 model GuildMemberData {
@@ -32,9 +32,20 @@ model GuildMemberData {
   nickname    String?
   streak      Int
   lastMessage DateTime
+  isVisibleEmoji Boolean @default(true)
 
   guild Guild @relation(fields: [guildId], references: [id], name: "GuildToMembers")
   user  User  @relation(fields: [userId], references: [id], name: "UserToGuilds")
 
   @@unique([guildId, userId])
+}
+
+model lvlRoles {
+  roleId   BigInt @id
+  guildId  BigInt
+  streak    Int
+
+  guild Guild @relation(fields: [guildId], references: [id])
+
+  @@unique([roleId, guildId])
 }

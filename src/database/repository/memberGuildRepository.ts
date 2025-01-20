@@ -75,10 +75,10 @@ const memberGuildRepository = {
 
 
     async updateVisibleEmoji(userID: string, guildID:string , isVisibleEmoji: boolean) {
-        const userId = BigInt(id);
+        const userId = BigInt(userID);
         const guildId = BigInt(guildID);
 
-        return client.user.update({
+        return client.guildMemberData.update({
             where: { guildId_userId: { guildId: guildId, userId: userId } },
             data: {
                 isVisibleEmoji: isVisibleEmoji

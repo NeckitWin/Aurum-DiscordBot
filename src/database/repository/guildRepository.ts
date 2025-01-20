@@ -38,6 +38,19 @@ const guildRepository = {
             where: {id: guildId},
             data: data
         })
+    },
+
+    async updateAllowDisableEmoji (guildId: string, allow: boolean) {
+        const id = BigInt(guildId);
+        const data = {
+            id: id,
+            allowDisableEmoji: allow
+        }
+
+        return client.guild.update({
+            where: {id: id},
+            data: data
+        })
     }
 }
 

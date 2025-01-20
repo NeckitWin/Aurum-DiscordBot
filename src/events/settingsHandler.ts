@@ -8,11 +8,12 @@ module.exports = {
     async execute(interaction: ButtonInteraction) {
         try {
             if (!interaction.isButton()) return;
-            const customIds = ['showUserSettings', 'showGuildSettings', 'setVisibleEmoji'];
+            const customIds = ['showUserSettings', 'showGuildSettings', 'setVisibleEmoji', 'setCustomEmoji', 'setPremium', 'allowDisableEmoji', 'addRoles'];
             const {customId} = interaction;
             if (!customIds.includes(customId)) return;
             if (interaction.user.id !== interaction.message.interaction?.user.id) return interaction.reply({content: 'Команда вызвана не вами', ephemeral: true});
             if (!interaction.guild) return;
+            if (!await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user)) await memberGuildRepository.upsertMemberGuild(interaction.guild, interaction.user, new Date());
             if (customId === 'showUserSettings' || customId === 'setVisibleEmoji') {
                 const userData = await userRepository.getById(interaction.user.id);
                 const memberData = await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user);
@@ -21,6 +22,13 @@ module.exports = {
                 const premEmoji = userData?.premiumEmoji;
 
                 if ( customId === 'setVisibleEmoji') {
+
+                    const guildData = await guildRepository.getGuild(interaction.guild.id);
+                    let allowDisableEmoji = guildData?.allowDisableEmoji;
+                    if (!allowDisableEmoji && !isPremium) {
+                        await memberGuildRepository.updateVisibleEmoji(interaction.user.id, interaction.guild.id, true);
+                        await interaction.reply({content: 'На сервере отключена возможность скрытия эмодзи в нике', ephemeral: true});
+                    }
                     await memberGuildRepository.updateVisibleEmoji(interaction.user.id, interaction.guild.id, !isVisibleEmoji);
                     isVisibleEmoji = !isVisibleEmoji;
                 }
@@ -55,10 +63,26 @@ module.exports = {
 
                 await interaction.update({embeds: [embed], components: [rowButtons, rowPremFeatures]});
 
-            } else if (customId === 'showGuildSettings') {
+            } else if (customId === 'showGuildSettings' || customId === 'allowDisableEmoji' || customId === 'addRoles') {
+
+                const guildData = await guildRepository.getGuild(interaction.guild.id);
+                const guildEmoji = guildData?.emoji;
+                let allowDisableEmoji = guildData?.allowDisableEmoji;
+
+                if (customId === 'allowDisableEmoji') {
+                    await guildRepository.updateAllowDisableEmoji(interaction.guild.id, !allowDisableEmoji);
+                    allowDisableEmoji = !allowDisableEmoji;
+                }
+
                 const embedGuildSettings = new EmbedBuilder()
                     .setTitle('Настройки сервера')
-                    .setDescription('Управляйте ролями и другими настройками бота');
+                    .setDescription(`Эмодзи сервера: ${guildEmoji}\n`+
+                        `1. Разрешить участникам сервера отключать эмодзи в нике: ${allowDisableEmoji ? 'да' : 'нет'}`);
+
+                const buttonAllowDisableEmoji = new ButtonBuilder()
+                    .setLabel('1. '+(allowDisableEmoji ? 'Отключить' : 'Включить'))
+                    .setCustomId('allowDisableEmoji')
+                    .setStyle(allowDisableEmoji ? ButtonStyle.Danger : ButtonStyle.Success);
 
                 const buttonAddRoles = new ButtonBuilder()
                     .setLabel('Настройка ролей')
@@ -67,7 +91,7 @@ module.exports = {
                     .setStyle(ButtonStyle.Primary);
 
                 const rowButtons = new ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(buttonAddRoles);
+                    .addComponents(buttonAllowDisableEmoji, buttonAddRoles );
 
                 await interaction.update({embeds: [embedGuildSettings], components: [rowButtons]});
 

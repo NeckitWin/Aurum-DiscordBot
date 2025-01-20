@@ -20,7 +20,7 @@ model Guild {
   id   BigInt @id
   name String
   emoji String @default("🔥")
-  isStreakVisibilityToggle Boolean @default(true)
+  allowDisableEmoji Boolean @default(true)
 
   members GuildMemberData[] @relation("GuildToMembers")
   lvlRoles lvlRoles[]

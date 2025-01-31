@@ -14,8 +14,8 @@ module.exports = {
                 console.warn(`У бота нет права "Управление никнеймами" на сервере ${guild.name}`);
                 return;
             }
-
-            await memberGuildRepository.upsertMemberGuild(guild, author, new Date());
+            const getMember = await guild.members.fetch(author.id);
+            await memberGuildRepository.upsertMemberGuild(guild, getMember, new Date());
             const guildData = await guildRepository.getGuild(guild.id);
             if (!guildData) return;
 
@@ -23,7 +23,7 @@ module.exports = {
             const memberData = await memberGuildRepository.getMemberGuild(guild, author);
             if (!memberData || guild.ownerId === author.id || !memberData.isVisibleEmoji) return;
 
-            await updateMemberNickname(member, author.displayName, emoji, memberData.streak);
+            await updateMemberNickname(member, memberData.nickname || getMember.displayName, emoji, memberData.streak);
         } catch (err) {
             console.error(err);
         }

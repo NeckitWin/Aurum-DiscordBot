@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Guild, User } from "discord.js";
+import {Guild, GuildMember, User} from "discord.js";
 import guildRepository from "./guildRepository";
 import userRepository from "./userRepository";
 
@@ -21,26 +21,22 @@ const memberGuildRepository = {
         });
     },
 
-    async upsertMemberGuild(guild: Guild, user: User, date: Date) {
+    async upsertMemberGuild(guild: Guild, member: GuildMember, date: Date) {
         const guildId = BigInt(guild.id);
-        const userId = BigInt(user.id);
-        const nickname = user.displayName;
+        const userId = BigInt(member.id);
+        const nickname = member.displayName;
         let streak = 1;
         let updateMessageDate = date;
 
-        const getUser = await userRepository.getById(user.id);
+        const getUser = await userRepository.getById(member.id);
         const getGuild = await guildRepository.getGuild(guild.id);
+        if (!getUser) await userRepository.upsert(member.user);
+        if (!getGuild) await guildRepository.upsertGuild(guild);
 
-        if (!getUser) {
-            await userRepository.upsert(user);
-        }
-        if (!getGuild) {
-            await guildRepository.upsertGuild(guild);
-        }
 
         let lastActivity;
         const day = 86400000;
-        const getData = await memberGuildRepository.getMemberGuild(guild, user);
+        const getData = await memberGuildRepository.getMemberGuild(guild, member.user);
         if (getData) {
             lastActivity = getData.lastMessage;
             const timeDifference = date.getTime() - lastActivity.getTime();

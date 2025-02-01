@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import {Guild, GuildMember, User} from "discord.js";
+import {Guild, User} from "discord.js";
 import guildRepository from "./guildRepository";
 import userRepository from "./userRepository";
 
@@ -13,30 +13,29 @@ const memberGuildRepository = {
         });
     },
 
-    async getMemberGuild(guild: Guild, user: User) {
+    async getMemberGuild(guild: Guild, userId: string) {
         const guildId = BigInt(guild.id);
-        const userId = BigInt(user.id);
         return client.guildMemberData.findFirst({
-            where: { guildId: guildId, userId: userId }
+            where: { guildId: guildId, userId: BigInt(userId) }
         });
     },
 
-    async upsertMemberGuild(guild: Guild, member: GuildMember, date: Date) {
+    async upsertMemberGuild(guild: Guild, user: User, date: Date) {
         const guildId = BigInt(guild.id);
-        const userId = BigInt(member.id);
-        const nickname = member.displayName;
+        const userId = BigInt(user.id);
+        const nickname = user.displayName;
         let streak = 1;
         let updateMessageDate = date;
 
-        const getUser = await userRepository.getById(member.id);
+        const getUser = await userRepository.getById(user.id);
         const getGuild = await guildRepository.getGuild(guild.id);
-        if (!getUser) await userRepository.upsert(member.user);
+        if (!getUser) await userRepository.upsert(user);
         if (!getGuild) await guildRepository.upsertGuild(guild);
 
 
         let lastActivity;
         const day = 86400000;
-        const getData = await memberGuildRepository.getMemberGuild(guild, member.user);
+        const getData = await memberGuildRepository.getMemberGuild(guild, user.id);
         if (getData) {
             lastActivity = getData.lastMessage;
             const timeDifference = date.getTime() - lastActivity.getTime();
@@ -62,8 +61,8 @@ const memberGuildRepository = {
                 lastMessage: updateMessageDate
             },
             update: {
-                nickname: nickname,
                 streak: streak,
+                nickname: nickname,
                 lastMessage: updateMessageDate
             }
         });

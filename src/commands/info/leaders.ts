@@ -11,7 +11,7 @@ module.exports = {
             const dataGuildMembers = await memberGuildRepository.getMembersGuild(guild);
             const topMembers = dataGuildMembers.sort((a, b) => b.streak - a.streak).slice(0, 10);
             const members = topMembers.map((member, index) => {
-                return `${index + 1}. ${member.nickname} - ${member.streak} дней`;
+                return `${index + 1}. ${member.nickname} - ${member.streak} days`;
             });
             await interaction.reply({content: members.join('\n')});
         } catch (err) {

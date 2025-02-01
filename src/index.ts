@@ -24,7 +24,7 @@ for (const folder of commandFolders) {
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command);
         } else {
-            console.log(`Ошибка в файле ${file} не найдены 'data' или 'execute' свойства!`);
+            console.log(`Error in file ${file} 'data' or 'execute' properties not found!`);
         }
     }
 }

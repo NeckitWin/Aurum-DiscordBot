@@ -1,5 +1,5 @@
 import {Client, Events, Guild} from "discord.js";
-import updateMembers from "../funcs/updateMembers";
+import updateMembers from "../base/updateMembers";
 
 module.exports = {
     name: Events.ClientReady,
@@ -17,7 +17,7 @@ module.exports = {
         const timeout = next.getTime() - now.getTime();
         setTimeout(function startDailyTask() {
             for (const guild of client.guilds.cache.values()) {
-                updateMembers(guild);
+                updateMembers(guild as Guild);
             }
             setTimeout(startDailyTask, 1000 * 60 * 60 * 24);
         }, timeout);

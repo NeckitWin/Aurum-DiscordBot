@@ -10,7 +10,7 @@ const updateMembers = async (guild: Guild) => {
 
         const client = guild.members.me ?? await guild.members.fetchMe();
         if (!client.permissions.has(PermissionsBitField.Flags.ManageNicknames)) {
-            console.warn(`У бота нет права "Управление никнеймами" на сервере ${guild.name}`);
+            console.warn(`Bot has no permission to manage nicknames on server ${guild.name}`);
             return;
         }
 
@@ -22,19 +22,19 @@ const updateMembers = async (guild: Guild) => {
             if (botRolePosition <= memberRolePosition) return;
 
             const memberData = getMembersFromDB.find(memberDB => memberDB.userId.toString() === member.id);
-            if (!memberData) return;
+            if (!memberData || !memberData.isVisibleEmoji) return;
 
-            const memberName = memberData.nickname || member.displayName;
-            const memberStreak = memberData.streak || 0;
+            const memberName = memberData?.nickname || member.displayName;
+            const memberStreak = memberData?.streak || 0;
             const newNickname = memberStreak >= 1
                 ? `${memberName} ${guildEmoji}${memberStreak}`.substring(0, 32)
                 : memberName;
 
             if (member.nickname !== newNickname) {
                 try {
-                    await member.setNickname(newNickname, 'Обновление никнеймов');
+                    await member.setNickname(newNickname, 'Update streak');
                 } catch (error) {
-                    console.error(`Ошибка обновления никнейма для ${member.user.tag} на сервере ${guild.name}:`, error);
+                    console.error(`Error updating nickname for ${member.user.tag} on server ${guild.name}:`, error);
                 }
             }
         }));

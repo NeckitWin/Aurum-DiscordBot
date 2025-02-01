@@ -5,11 +5,12 @@ import {
     ButtonInteraction,
     ButtonStyle,
     EmbedBuilder,
-    Events, RoleSelectMenuComponent, SelectMenuComponent
+    Events
 } from "discord.js";
 import userRepository from "../database/repository/userRepository";
 import memberGuildRepository from "../database/repository/memberGuildRepository";
 import guildRepository from "../database/repository/guildRepository";
+import updateMembers from "../base/updateMembers";
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -18,19 +19,19 @@ module.exports = {
             if (!interaction.isButton()) return;
             const customIds = ['showUserSettings', 'showGuildSettings', 'setVisibleEmoji',
                 'setCustomEmoji', 'setPremium', 'allowDisableEmoji', 'addRoles',
-                'lvlRolesSettings', 'addLVLRoles'];
+                'lvlRolesSettings', 'addLVLRoles', 'updateAllNicknames'];
             const {customId} = interaction;
             if (!customIds.includes(customId)) return;
             if (interaction.user.id !== interaction.message.interaction?.user.id) return interaction.reply({
-                content: 'Команда вызвана не вами',
+                content: 'Command is not available for you',
                 ephemeral: true
             });
             if (!interaction.guild) return;
             const member = await interaction.guild.members.fetch(interaction.user.id);
-            if (!await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user)) await memberGuildRepository.upsertMemberGuild(interaction.guild, member, new Date());
+            if (!await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user.id)) await memberGuildRepository.upsertMemberGuild(interaction.guild, member.user, new Date());
             if (customId === 'showUserSettings' || customId === 'setVisibleEmoji') {
                 const userData = await userRepository.getById(interaction.user.id);
-                const memberData = await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user);
+                const memberData = await memberGuildRepository.getMemberGuild(interaction.guild, interaction.user.id);
                 const isPremium = userData?.premium;
                 let isVisibleEmoji = memberData?.isVisibleEmoji;
                 const premEmoji = userData?.premiumEmoji;
@@ -42,7 +43,7 @@ module.exports = {
                     if (!allowDisableEmoji && !isPremium) {
                         await memberGuildRepository.updateVisibleEmoji(interaction.user.id, interaction.guild.id, true);
                         await interaction.reply({
-                            content: 'На сервере отключена возможность скрытия эмодзи в нике',
+                            content: 'On this server, you cannot disable emoji in your nickname',
                             ephemeral: true
                         });
                     }
@@ -51,23 +52,23 @@ module.exports = {
                 }
 
                 const embed = new EmbedBuilder()
-                    .setTitle('Настройки пользователя')
-                    .setDescription('Премиум пользователя доступно больше крутых фич');
+                    .setTitle('User settings')
+                    .setDescription('User premium, allows you to use more cool features');
 
                 const buttonVisibleEmoji = new ButtonBuilder()
-                    .setLabel(`Видимость эмодзи: ${isVisibleEmoji ? 'включена' : 'выключена'}`)
+                    .setLabel(`Visible emoji is: ${isVisibleEmoji ? 'on' : 'off'}`)
                     .setCustomId('setVisibleEmoji')
                     .setEmoji('👀')
                     .setStyle(ButtonStyle.Primary);
 
                 const buttonCustomEmoji = new ButtonBuilder()
-                    .setLabel('Собственный эмодзи')
+                    .setLabel('Set custom emoji')
                     .setCustomId('setCustomEmoji')
                     .setEmoji('👑')
                     .setStyle(ButtonStyle.Primary);
 
                 const buttonPremium = new ButtonBuilder()
-                    .setLabel(`Премиум`)
+                    .setLabel(`Premium`)
                     .setCustomId('setPremium')
                     .setEmoji('👑')
                     .setStyle(isPremium ? ButtonStyle.Success : ButtonStyle.Danger);
@@ -80,7 +81,7 @@ module.exports = {
 
                 await interaction.update({embeds: [embed], components: [rowButtons, rowPremFeatures]});
 
-            } else if (customId === 'showGuildSettings' || customId === 'allowDisableEmoji' || customId === 'addRoles') {
+            } else if (customId === 'showGuildSettings' || customId === 'allowDisableEmoji' || customId === 'addRoles' || customId === 'updateAllNicknames') {
 
                 const guildData = await guildRepository.getGuild(interaction.guild.id);
                 const guildEmoji = guildData?.emoji;
@@ -91,24 +92,41 @@ module.exports = {
                     allowDisableEmoji = !allowDisableEmoji;
                 }
 
+                if (customId === 'updateAllNicknames') {
+                    await updateMembers(interaction.guild);
+                    await interaction.reply({content: 'All nicknames have been updated', ephemeral: true});
+                }
+
                 const embedGuildSettings = new EmbedBuilder()
-                    .setTitle('Настройки сервера')
-                    .setDescription(`Эмодзи сервера: ${guildEmoji}\n` +
-                        `1. Разрешить участникам сервера отключать эмодзи в нике: ${allowDisableEmoji ? 'да' : 'нет'}`);
+                    .setTitle('Guild settings')
+                    .setDescription(`Emoji for the server:${guildEmoji}\n` +
+                        `1. Allow disable emoji for members: ${allowDisableEmoji ? 'on' : 'off'}`);
 
                 const buttonAllowDisableEmoji = new ButtonBuilder()
-                    .setLabel('1. ' + (allowDisableEmoji ? 'Отключить' : 'Включить'))
+                    .setLabel('1. ' + (allowDisableEmoji ? 'Disable' : 'Allow'))
                     .setCustomId('allowDisableEmoji')
                     .setStyle(allowDisableEmoji ? ButtonStyle.Danger : ButtonStyle.Success);
 
                 const buttonAddRoles = new ButtonBuilder()
-                    .setLabel('Настройка ролей')
+                    .setLabel('Role settings')
                     .setCustomId('lvlRolesSettings')
                     .setEmoji('👑')
                     .setStyle(ButtonStyle.Primary);
 
+                const buttonUpdateAllNicknames = new ButtonBuilder()
+                    .setLabel('Update all nicknames')
+                    .setCustomId('updateAllNicknames')
+                    .setEmoji('🔄')
+                    .setStyle(ButtonStyle.Secondary);
+
+                const buttonDeleteServerStreak = new ButtonBuilder()
+                    .setLabel('Delete server streak')
+                    .setCustomId('deleteServerStreak')
+                    .setEmoji('🗑️')
+                    .setStyle(ButtonStyle.Danger);
+
                 const rowButtons = new ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(buttonAllowDisableEmoji, buttonAddRoles);
+                    .addComponents(buttonAllowDisableEmoji, buttonAddRoles, buttonUpdateAllNicknames, buttonDeleteServerStreak);
 
                 await interaction.update({embeds: [embedGuildSettings], components: [rowButtons]});
 
@@ -117,20 +135,20 @@ module.exports = {
 
                 const roleLVLMenu = new RoleSelectMenuBuilder()
                     .setCustomId('addLVLRoles')
-                    .setPlaceholder('Выберите роль');
+                    .setPlaceholder('Choose a role');
 
                 const buttonAddLVLRole = new ButtonBuilder()
-                    .setLabel('Добавить роль')
+                    .setLabel('Add role')
                     .setCustomId('addLVLRole')
                     .setStyle(ButtonStyle.Success);
 
                 const buttonEditLVLRole = new ButtonBuilder()
-                    .setLabel('Редактировать роли')
+                    .setLabel('Edit roles')
                     .setCustomId('editLVLRoles')
                     .setStyle(ButtonStyle.Primary);
 
                 const buttonReturn = new ButtonBuilder()
-                    .setLabel('Вернуться')
+                    .setLabel('Return')
                     .setCustomId('showGuildSettings')
                     .setStyle(ButtonStyle.Secondary);
 
@@ -142,8 +160,8 @@ module.exports = {
 
 
                 const embedLVLSettings = new EmbedBuilder()
-                    .setTitle('Настройка ролей')
-                    .setDescription('Выберите роль для добавления');
+                    .setTitle('Role settings')
+                    .setDescription('Choose a role to add or edit');
 
                 await interaction.update({embeds: [embedLVLSettings], components: [rowRoleLVL, rowButtons]});
             }

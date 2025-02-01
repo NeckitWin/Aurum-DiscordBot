@@ -17,18 +17,18 @@ module.exports = {
     async execute(interaction: CommandInteraction) {
         try {
             const embed = new EmbedBuilder()
-                .setTitle('Настройки')
-                .setDescription('Используйте /emoji для установки эмодзи для ника')
+                .setTitle('Settings')
+                .setDescription('Use /emoji to set an emoji for your nickname')
                 .setColor('#248045')
 
             const buttonUserSettings = new ButtonBuilder()
-                .setLabel('Настройки пользователя')
+                .setLabel('User settings')
                 .setCustomId('showUserSettings')
                 .setEmoji('🔧')
                 .setStyle(ButtonStyle.Success);
 
             const buttonGuildSettings = new ButtonBuilder()
-                .setLabel('Настройки сервера')
+                .setLabel('Server settings')
                 .setCustomId('showGuildSettings')
                 .setEmoji('👑')
                 .setStyle(ButtonStyle.Secondary);
